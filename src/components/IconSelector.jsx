@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 // Importaciones ampliadas de colecciones de iconos
 import * as Ai from "react-icons/ai"; // Ant Design Icons
 import * as Bi from "react-icons/bi"; // BoxIcons
@@ -261,6 +261,19 @@ function IconSelector({ selectedIcon, onSelectIcon, iconColor }) {
   const [isOpen, setIsOpen] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState(null);
   
+  // Evitar scroll del body cuando el modal está abierto
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [isOpen]);
+  
   // Filtrar iconos según el término de búsqueda y/o categoría
   let filteredIcons = [];
   
@@ -295,66 +308,69 @@ function IconSelector({ selectedIcon, onSelectIcon, iconColor }) {
       </div>
       
       {isOpen && (
-        <div className="icon-popup">
-          <div className="search-row">
-            <input 
-              type="text" 
-              placeholder="Buscar icono..." 
-              value={searchTerm}
-              onChange={(e) => {
-                setSearchTerm(e.target.value);
-                setSelectedCategory(null); // Limpiar categoría al buscar
-              }}
-              className="icon-search"
-            />
-          </div>
-          
-          {!searchTerm && (
-            <div className="categories-row">
-              <button 
-                className={`category-button ${selectedCategory === null ? 'active' : ''}`}
-                onClick={() => setSelectedCategory(null)}
-              >
-                Populares
+        <div className="icon-modal-overlay" onClick={() => setIsOpen(false)}>
+          <div className="icon-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="icon-modal-header">
+              <h3>Selecciona un Icono</h3>
+              <button className="modal-close-button" onClick={() => setIsOpen(false)}>
+                &times;
               </button>
-              {iconCategories.map((category) => (
-                <button 
-                  key={category.name}
-                  className={`category-button ${selectedCategory === category.name ? 'active' : ''}`}
-                  onClick={() => setSelectedCategory(category.name)}
-                >
-                  {category.name}
-                </button>
-              ))}
             </div>
-          )}
-          
-          <div className="icons-grid">
-            {filteredIcons.map(([name, Icon]) => (
-              <div 
-                key={name}
-                className={`icon-item ${selectedIcon === name ? 'selected' : ''}`}
-                onClick={() => {
-                  onSelectIcon(name);
-                  setIsOpen(false);
+            
+            <div className="icon-modal-search">
+              <input 
+                type="text" 
+                placeholder="Buscar icono..." 
+                value={searchTerm}
+                onChange={(e) => {
+                  setSearchTerm(e.target.value);
+                  setSelectedCategory(null); // Limpiar categoría al buscar
                 }}
-                title={name}
-              >
-                <Icon size={24} />
-                <span>{name}</span>
+                className="icon-search"
+                autoFocus
+              />
+            </div>
+            
+            {!searchTerm && (
+              <div className="categories-row">
+                <button 
+                  className={`category-button ${selectedCategory === null ? 'active' : ''}`}
+                  onClick={() => setSelectedCategory(null)}
+                >
+                  Populares
+                </button>
+                {iconCategories.map((category) => (
+                  <button 
+                    key={category.name}
+                    className={`category-button ${selectedCategory === category.name ? 'active' : ''}`}
+                    onClick={() => setSelectedCategory(category.name)}
+                  >
+                    {category.name}
+                  </button>
+                ))}
               </div>
-            ))}
-            {filteredIcons.length === 0 && (
-              <div className="no-results">No se encontraron iconos</div>
             )}
+            
+            <div className="icons-grid">
+              {filteredIcons.map(([name, Icon]) => (
+                <div 
+                  key={name}
+                  className={`icon-item ${selectedIcon === name ? 'selected' : ''}`}
+                  onClick={() => {
+                    onSelectIcon(name);
+                    setIsOpen(false);
+                  }}
+                  title={name}
+                >
+                  <Icon size={32} /> {/* Aumentado el tamaño para mejor visibilidad */}
+                  <span>{name}</span>
+                </div>
+              ))}
+              {filteredIcons.length === 0 && (
+                <div className="no-results">No se encontraron iconos</div>
+              )}
+            </div>
           </div>
-          
-          <button 
-            className="close-button" 
-            onClick={() => setIsOpen(false)}
-          >
-            Cerrar
-          </button>
         </div>
       )}
     </div>
