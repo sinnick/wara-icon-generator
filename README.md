@@ -1,12 +1,60 @@
-# React + Vite
+# Generador de Iconos
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Una aplicación web simple pero potente para crear iconos personalizados. Desarrollada con React y Vite, esta herramienta te permite diseñar iconos con diferentes colores, bordes y símbolos SVG.
 
-Currently, two official plugins are available:
+![Ejemplo de Icono](https://via.placeholder.com/200x200/d80073/FFFFFF?text=Icon)
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## Características
 
-## Expanding the ESLint configuration
+- **Personalización de Colores**: Elige el color de fondo y del icono con un selector de color intuitivo.
+- **Configuración de Bordes**: Define el ancho y color del borde según tus necesidades.
+- **Biblioteca de Iconos SVG**: Selecciona entre una amplia variedad de iconos organizados por categorías.
+- **Ajuste de Tamaño**: Controla el tamaño del icono dentro del contenedor.
+- **Vista Previa en Tiempo Real**: Visualiza tus cambios instantáneamente.
+- **Exportación de Alta Calidad**: Descarga tu icono como imagen PNG en resolución 1024x1024 píxeles.
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+## Cómo Usar
+
+1. **Selecciona un Icono**: Elige entre varias opciones de la biblioteca de iconos.
+2. **Personaliza el Aspecto**:
+   - Ajusta el color de fondo
+   - Modifica el color del icono
+   - Configura el ancho y color del borde
+   - Cambia el tamaño del icono
+3. **Visualiza en Tiempo Real**: Observa los cambios inmediatamente en la vista previa.
+4. **Descarga tu Icono**: Haz clic en "Descargar Icono" para obtener una imagen PNG lista para usar.
+
+## Tecnologías Utilizadas
+
+- **React**: Biblioteca de interfaz de usuario
+- **Vite**: Entorno de desarrollo rápido
+- **react-icons**: Colección de iconos SVG
+- **html-to-image**: Conversión de elementos DOM a imágenes
+- **file-saver**: Descarga de archivos en el navegador
+
+## Instalación y Ejecución
+
+```bash
+# Instalar dependencias
+npm install
+
+# Iniciar servidor de desarrollo
+npm run dev
+
+# Construir para producción
+npm run build
+
+# Previsualizar la versión de producción
+npm run preview
+```
+
+## Personalización Avanzada
+
+El código de la aplicación está organizado para facilitar la extensión y personalización:
+
+- **Añadir más Iconos**: Modifica el archivo `IconSelector.jsx` para incluir más colecciones de iconos.
+- **Funcionalidades Adicionales**: La arquitectura basada en componentes permite añadir nuevas características fácilmente.
+
+## Licencia
+
+MIT
