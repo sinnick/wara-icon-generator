@@ -8,7 +8,7 @@ import ColorPicker from './components/ColorPicker'
 
 function App() {
   // Estados para las propiedades del icono
-  const [backgroundColor, setBackgroundColor] = useState('#d80073') // Color magenta por defecto como en la imagen
+  const [backgroundColor, setBackgroundColor] = useState('#ca0060') // Color magenta por defecto como en la imagen
   const [borderColor, setBorderColor] = useState('#000000')
   const [borderWidth, setBorderWidth] = useState(0)
   const [selectedIcon, setSelectedIcon] = useState('file') // Icono de archivo por defecto
