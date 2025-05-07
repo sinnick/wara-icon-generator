@@ -5,6 +5,7 @@ import ReactDOM from 'react-dom/client'
 import './App.css'
 import IconSelector from './components/IconSelector'
 import ColorPicker from './components/ColorPicker'
+import SvgUploader from './components/SvgUploader'
 
 function App() {
 	// Estados para las propiedades del icono
@@ -14,8 +15,27 @@ function App() {
 	const [selectedIcon, setSelectedIcon] = useState('file') // Icono de archivo por defecto
 	const [iconColor, setIconColor] = useState('#FFFFFF') // Color blanco por defecto para el icono
 	const [iconSize, setIconSize] = useState(60)
+	const [customSvg, setCustomSvg] = useState(null) // Estado para el SVG personalizado
 
 	const iconRef = useRef(null)
+
+	// Función para manejar la carga de SVG personalizado
+	const handleSvgUpload = (svgContent) => {
+		setCustomSvg(svgContent);
+		// Si se sube un SVG personalizado, deseleccionamos cualquier icono
+		if (svgContent) {
+			setSelectedIcon(null);
+		}
+	};
+
+	// Función para manejar la selección de iconos predefinidos
+	const handleIconSelect = (iconName) => {
+		setSelectedIcon(iconName);
+		// Si seleccionamos un icono predefinido, eliminamos cualquier SVG personalizado
+		if (iconName) {
+			setCustomSvg(null);
+		}
+	};
 
 	// Función para descargar el icono como PNG
 	const downloadIcon = async () => {
@@ -43,56 +63,86 @@ function App() {
 				exportIcon.style.justifyContent = 'center';
 				tempContainer.appendChild(exportIcon);
 
-				// Renderizar el icono SVG dentro del contenedor
-				const IconComponent = IconSelector.getIconComponent(selectedIcon);
-				if (IconComponent) {
 					// Crear un div especial solo para el icono con tamaño controlado
-					const iconContainer = document.createElement('div');
-					iconContainer.style.width = `${iconSize}%`;
-					iconContainer.style.height = `${iconSize}%`;
-					iconContainer.style.display = 'flex';
-					iconContainer.style.alignItems = 'center';
-					iconContainer.style.justifyContent = 'center';
-					exportIcon.appendChild(iconContainer);
+				const iconContainer = document.createElement('div');
+				iconContainer.style.width = `${iconSize}%`;
+				iconContainer.style.height = `${iconSize}%`;
+				iconContainer.style.display = 'flex';
+				iconContainer.style.alignItems = 'center';
+				iconContainer.style.justifyContent = 'center';
+				exportIcon.appendChild(iconContainer);
 
-					// Renderizar el SVG dentro del contenedor de tamaño controlado
-					const tempRoot = document.createElement('div');
-					tempRoot.style.width = '100%';
-					tempRoot.style.height = '100%';
-					tempRoot.style.display = 'flex';
-					iconContainer.appendChild(tempRoot);
+				if (customSvg) {
+					// Renderizar el SVG personalizado
+					// Crear un contenedor adicional para garantizar el centrado correcto y el escalado
+					const svgContainer = document.createElement('div');
+					svgContainer.style.width = '100%';
+					svgContainer.style.height = '100%';
+					svgContainer.style.display = 'flex';
+					svgContainer.style.alignItems = 'center';
+					svgContainer.style.justifyContent = 'center';
+					iconContainer.appendChild(svgContainer);
+					
+					// Insertar el SVG en el contenedor
+					svgContainer.innerHTML = customSvg;
+					
+					// Aplicar color al SVG si es necesario
+					const svgElement = svgContainer.querySelector('svg');
+					if (svgElement) {
+						// Ajustar el SVG para que ocupe todo el espacio
+						svgElement.setAttribute('width', '100%');
+						svgElement.setAttribute('height', '100%');
+						svgElement.style.maxWidth = '100%';
+						svgElement.style.maxHeight = '100%';
+						// Asegurar que el SVG se renderiza correctamente en el centro
+						svgElement.style.display = 'block';
+						// Opcionalmente aplicar color si el SVG lo permite
+						svgElement.style.fill = iconColor;
+						svgElement.style.color = iconColor;
+					}
+				} else if (selectedIcon) {
+					// Renderizar el icono predefinido
+					const IconComponent = IconSelector.getIconComponent(selectedIcon);
+					if (IconComponent) {
+						// Crear un div especial para el icono predefinido
+						const tempRoot = document.createElement('div');
+						tempRoot.style.width = '100%';
+						tempRoot.style.height = '100%';
+						tempRoot.style.display = 'flex';
+						iconContainer.appendChild(tempRoot);
 
-					// Usar ReactDOM para renderizar el componente
-					const root = ReactDOM.createRoot(tempRoot);
-					root.render(
-						<IconComponent
-							size="100%"
-							color={iconColor}
-							style={{
-								width: '100%',
-								height: '100%',
-								display: 'block'
-							}}
-						/>
-					);
-
-					// Esperar a que el componente se renderice
-					await new Promise(resolve => setTimeout(resolve, 100));
-
-					// Capturar la imagen con exactamente 1024x1024 píxeles
-					const dataUrl = await toPng(exportIcon, {
-						quality: 1.0,
-						pixelRatio: 1, // Usar pixelRatio de 1 para mantener el tamaño exacto
-						width: 1024,
-						height: 1024
-					});
-
-					// Limpiar
-					document.body.removeChild(tempContainer);
-
-					// Descargar la imagen
-					saveAs(dataUrl, 'icon.png');
+						// Usar ReactDOM para renderizar el componente
+						const root = ReactDOM.createRoot(tempRoot);
+						root.render(
+							<IconComponent
+								size="100%"
+								color={iconColor}
+								style={{
+									width: '100%',
+									height: '100%',
+									display: 'block'
+								}}
+							/>
+						);
+					}
 				}
+
+				// Esperar a que el componente se renderice
+				await new Promise(resolve => setTimeout(resolve, 100));
+
+				// Capturar la imagen con exactamente 1024x1024 píxeles
+				const dataUrl = await toPng(exportIcon, {
+					quality: 1.0,
+					pixelRatio: 1, // Usar pixelRatio de 1 para mantener el tamaño exacto
+					width: 1024,
+					height: 1024
+				});
+
+				// Limpiar
+				document.body.removeChild(tempContainer);
+
+				// Descargar la imagen
+				saveAs(dataUrl, 'icon.png');
 			} catch (error) {
 				console.error('Error al generar la imagen:', error);
 			}
@@ -151,10 +201,17 @@ function App() {
 					</div>
 
 					<div className="control-group">
-						<label>Seleccionar Icono:</label>
+						<SvgUploader
+							onSvgUpload={handleSvgUpload}
+							customSvg={customSvg}
+						/>
+					</div>
+
+					<div className="control-group">
+						<label>O selecciona un icono predefinido:</label>
 						<IconSelector
 							selectedIcon={selectedIcon}
-							onSelectIcon={setSelectedIcon}
+							onSelectIcon={handleIconSelect}
 							iconColor={iconColor}
 						/>
 					</div>
@@ -176,11 +233,52 @@ function App() {
 							height: '200px'
 						}}
 					>
-						<IconSelector.Icon
-							iconName={selectedIcon}
-							size={`${iconSize}%`}
-							color={iconColor}
-						/>
+						{customSvg ? (
+							<div 
+								className="svg-container"
+								style={{ 
+									width: `${iconSize}%`, 
+									height: `${iconSize}%`,
+									display: 'flex',
+									alignItems: 'center',
+									justifyContent: 'center',
+									position: 'relative'
+								}}
+							>
+								<div 
+									className="svg-wrapper"
+									style={{ 
+										width: '100%', 
+										height: '100%',
+										display: 'flex',
+										alignItems: 'center',
+										justifyContent: 'center',
+										overflow: 'hidden'
+									}}
+								>
+									<div
+										style={{
+											width: '100%',
+											height: '100%',
+											display: 'flex',
+											alignItems: 'center',
+											justifyContent: 'center'
+										}}
+										dangerouslySetInnerHTML={{ 
+											__html: customSvg.replace(/<svg/, `<svg style="width:100%;height:100%;fill:${iconColor};color:${iconColor};display:block" `) 
+										}} 
+									/>
+								</div>
+							</div>
+						) : (
+							selectedIcon && (
+								<IconSelector.Icon
+									iconName={selectedIcon}
+									size={`${iconSize}%`}
+									color={iconColor}
+								/>
+							)
+						)}
 					</div>
 				</div>
 			</div>
