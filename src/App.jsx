@@ -16,6 +16,7 @@ function App() {
 	const [iconColor, setIconColor] = useState('#FFFFFF') // Color blanco por defecto para el icono
 	const [iconSize, setIconSize] = useState(60)
 	const [customSvg, setCustomSvg] = useState(null) // Estado para el SVG personalizado
+	const [exportSize, setExportSize] = useState(1024); // Resolución de exportación (px)
 
 	const iconRef = useRef(null)
 
@@ -41,13 +42,15 @@ function App() {
 	const downloadIcon = async () => {
 		if (iconRef.current) {
 			try {
+				const resolution = exportSize;
+				const scaleFactor = resolution / 200;
 				// Crear un contenedor temporal para la versión de exportación del icono
 				const tempContainer = document.createElement('div');
 				tempContainer.style.position = 'absolute';
 				tempContainer.style.left = '-9999px';
 				tempContainer.style.top = '-9999px';
-				tempContainer.style.width = '1024px';
-				tempContainer.style.height = '1024px';
+				tempContainer.style.width = `${resolution}px`;
+				tempContainer.style.height = `${resolution}px`;
 				document.body.appendChild(tempContainer);
 
 				// Crear el elemento del icono para exportación
@@ -55,7 +58,7 @@ function App() {
 				exportIcon.style.width = '100%';
 				exportIcon.style.height = '100%';
 				exportIcon.style.backgroundColor = backgroundColor;
-				exportIcon.style.border = `${borderWidth * 5}px solid ${borderColor}`; // Escalar el borde proporcionalmente
+				exportIcon.style.border = `${borderWidth * scaleFactor}px solid ${borderColor}`; // Escalar el borde proporcionalmente
 				exportIcon.style.borderRadius = '16px'; // Bordes redondeados como en la vista previa
 				exportIcon.style.boxSizing = 'border-box';
 				exportIcon.style.display = 'flex';
@@ -130,12 +133,12 @@ function App() {
 				// Esperar a que el componente se renderice
 				await new Promise(resolve => setTimeout(resolve, 100));
 
-				// Capturar la imagen con exactamente 1024x1024 píxeles
+				// Capturar la imagen con la resolución seleccionada
 				const dataUrl = await toPng(exportIcon, {
 					quality: 1.0,
-					pixelRatio: 1, // Usar pixelRatio de 1 para mantener el tamaño exacto
-					width: 1024,
-					height: 1024
+					pixelRatio: 1, // Mantener el tamaño exacto
+					width: resolution,
+					height: resolution
 				});
 
 				// Limpiar
@@ -198,6 +201,14 @@ function App() {
 					<div className="control-group">
 						<label>Color del Icono:</label>
 						<ColorPicker color={iconColor} onChange={setIconColor} />
+					</div>
+
+					<div className="control-group">
+						<label>Resolución de Exportación:</label>
+						<select value={exportSize} onChange={(e) => setExportSize(Number(e.target.value))}>
+							<option value={512}>512x512</option>
+							<option value={1024}>1024x1024</option>
+						</select>
 					</div>
 
 					<div className="control-group">
