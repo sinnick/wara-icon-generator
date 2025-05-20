@@ -16,7 +16,8 @@ function App() {
 	const [iconColor, setIconColor] = useState('#FFFFFF') // Color blanco por defecto para el icono
 	const [iconSize, setIconSize] = useState(60)
 	const [customSvg, setCustomSvg] = useState(null) // Estado para el SVG personalizado
-	const [exportSize, setExportSize] = useState(1024); // Resolución de exportación (px)
+	const [exportSize, setExportSize] = useState('1024x1024'); // Resolución de exportación (ancho x alto)
+	const [viewerType, setViewerType] = useState('icono'); // Tipo de visualizador: icono o banner
 
 	const iconRef = useRef(null)
 
@@ -42,15 +43,16 @@ function App() {
 	const downloadIcon = async () => {
 		if (iconRef.current) {
 			try {
-				const resolution = exportSize;
-				const scaleFactor = resolution / 200;
+				// Parsear ancho y alto de la resolución
+				const [resWidth, resHeight] = exportSize.split('x').map(Number);
+				const scaleFactor = resWidth / 200;
 				// Crear un contenedor temporal para la versión de exportación del icono
 				const tempContainer = document.createElement('div');
 				tempContainer.style.position = 'absolute';
 				tempContainer.style.left = '-9999px';
 				tempContainer.style.top = '-9999px';
-				tempContainer.style.width = `${resolution}px`;
-				tempContainer.style.height = `${resolution}px`;
+				tempContainer.style.width = `${resWidth}px`;
+				tempContainer.style.height = `${resHeight}px`;
 				document.body.appendChild(tempContainer);
 
 				// Crear el elemento del icono para exportación
@@ -137,8 +139,8 @@ function App() {
 				const dataUrl = await toPng(exportIcon, {
 					quality: 1.0,
 					pixelRatio: 1, // Mantener el tamaño exacto
-					width: resolution,
-					height: resolution
+					width: resWidth,
+					height: resHeight
 				});
 
 				// Limpiar
@@ -205,9 +207,17 @@ function App() {
 
 					<div className="control-group">
 						<label>Resolución de Exportación:</label>
-						<select value={exportSize} onChange={(e) => setExportSize(Number(e.target.value))}>
-							<option value={512}>512x512</option>
-							<option value={1024}>1024x1024</option>
+						<select value={exportSize} onChange={(e) => setExportSize(e.target.value)}>
+							<option value="512x512">512x512</option>
+							<option value="1024x1024">1024x1024</option>
+							<option value="1024x500">1024x500</option>
+						</select>
+					</div>
+					<div className="control-group">
+						<label>Visualizador:</label>
+						<select value={viewerType} onChange={e => setViewerType(e.target.value)}>
+							<option value="icono">Icono</option>
+							<option value="banner">Banner</option>
 						</select>
 					</div>
 
@@ -236,51 +246,88 @@ function App() {
 					<h2>Vista Previa</h2>
 					<div
 						ref={iconRef}
-						className="icon-preview"
+						className={viewerType === 'icono' ? 'icon-preview' : 'banner-preview'}
 						style={{
 							backgroundColor: backgroundColor,
 							border: `${borderWidth}px solid ${borderColor}`,
-							width: '200px',
-							height: '200px'
+							width: viewerType === 'icono' ? '200px' : '1024px',
+							height: viewerType === 'icono' ? '200px' : '500px',
+							position: 'relative'
 						}}
 					>
 						{customSvg ? (
-							<div 
-								className="svg-container"
-								style={{ 
-									width: `${iconSize}%`, 
-									height: `${iconSize}%`,
-									display: 'flex',
-									alignItems: 'center',
-									justifyContent: 'center',
-									position: 'relative'
-								}}
-							>
-								<div 
-									className="svg-wrapper"
-									style={{ 
-										width: '100%', 
-										height: '100%',
-										display: 'flex',
-										alignItems: 'center',
-										justifyContent: 'center',
-										overflow: 'hidden'
-									}}
-								>
-									<div
-										style={{
-											width: '100%',
-											height: '100%',
-											display: 'flex',
-											alignItems: 'center',
-											justifyContent: 'center'
-										}}
-										dangerouslySetInnerHTML={{ 
-											__html: customSvg.replace(/<svg/, `<svg style="width:100%;height:100%;fill:${iconColor};color:${iconColor};display:block" `) 
-										}} 
-									/>
-								</div>
-							</div>
+						  viewerType === 'banner' ? (
+						    <div
+						      className="svg-container-banner"
+						      style={{
+						        position: 'absolute',
+						        top: '50%',
+						        left: '50%',
+						        transform: 'translate(-50%, -50%)',
+						        width: `${iconSize}%`,  // tamaño relativo al banner
+						        height: `${iconSize}%`,
+						        display: 'flex',
+						        alignItems: 'center',
+						        justifyContent: 'center'
+						      }}
+						    >
+						      <div
+						        className="svg-wrapper-banner"
+						        style={{
+						          width: '100%',
+						          height: '100%',
+						          display: 'flex',
+						          alignItems: 'center',
+						          justifyContent: 'center',
+						          overflow: 'hidden'
+						        }}
+						      >
+						        <div
+						          style={{ width: '100%', height: '100%' }}  // ocupar todo el contenedor
+						          dangerouslySetInnerHTML={{
+						            __html: customSvg.replace(/<svg/, `<svg style="width:100%;height:100%;fill:${iconColor};color:${iconColor};display:block" `)
+						          }}
+						        />
+						      </div>
+						    </div>
+						  ) : (
+						    <div
+						      className="svg-container"
+						      style={{
+						        width: `${iconSize}%`,
+						        height: `${iconSize}%`,
+						        display: 'flex',
+						        alignItems: 'center',
+						        justifyContent: 'center',
+						        position: 'relative'
+						      }}
+						    >
+						      <div
+						        className="svg-wrapper"
+						        style={{
+						          width: '100%',
+						          height: '100%',
+						          display: 'flex',
+						          alignItems: 'center',
+						          justifyContent: 'center',
+						          overflow: 'hidden'
+						        }}
+						      >
+						        <div
+						          style={{
+						            width: '100%',
+						            height: '100%',
+						            display: 'flex',
+						            alignItems: 'center',
+						            justifyContent: 'center'
+						          }}
+						          dangerouslySetInnerHTML={{
+						            __html: customSvg.replace(/<svg/, `<svg style="width:100%;height:100%;fill:${iconColor};color:${iconColor};display:block" `)
+						          }}
+						        />
+						      </div>
+						    </div>
+						  )
 						) : (
 							selectedIcon && (
 								<IconSelector.Icon
