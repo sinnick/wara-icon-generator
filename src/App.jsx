@@ -44,7 +44,11 @@ function App() {
 		if (iconRef.current) {
 			try {
 				// Parsear ancho y alto de la resolución
-				const [resWidth, resHeight] = exportSize.split('x').map(Number);
+				let [resWidth, resHeight] = exportSize.split('x').map(Number);
+
+				if (viewerType === 'splash' && resWidth > resHeight) {
+					[resWidth, resHeight] = [resHeight, resWidth];
+				}
 				const scaleFactor = resWidth / 200;
 				// Crear un contenedor temporal para la versión de exportación del icono
 				const tempContainer = document.createElement('div');
@@ -211,6 +215,7 @@ function App() {
 							<option value="512x512">512x512</option>
 							<option value="1024x1024">1024x1024</option>
 							<option value="1024x500">1024x500</option>
+							<option value="2622x1206">2622x1206</option>
 						</select>
 					</div>
 					<div className="control-group">
@@ -218,6 +223,7 @@ function App() {
 						<select value={viewerType} onChange={e => setViewerType(e.target.value)}>
 							<option value="icono">Icono</option>
 							<option value="banner">Banner</option>
+							<option value="splash">Splash</option>
 						</select>
 					</div>
 
@@ -246,17 +252,17 @@ function App() {
 					<h2>Vista Previa</h2>
 					<div
 						ref={iconRef}
-						className={viewerType === 'icono' ? 'icon-preview' : 'banner-preview'}
+						className={viewerType === 'icono' ? 'icon-preview' : viewerType === 'banner' ? 'banner-preview' : 'splash-preview'}
 						style={{
 							backgroundColor: backgroundColor,
 							border: `${borderWidth}px solid ${borderColor}`,
-							width: viewerType === 'icono' ? '200px' : '1024px',
-							height: viewerType === 'icono' ? '200px' : '500px',
+							width: viewerType === 'icono' ? '200px' : viewerType === 'banner' ? '1024px' : '300px',
+							height: viewerType === 'icono' ? '200px' : viewerType === 'banner' ? '500px' : '600px',
 							position: 'relative'
 						}}
 					>
 						{customSvg ? (
-						  viewerType === 'banner' ? (
+						  viewerType === 'banner' || viewerType === 'splash' ? (
 						    <div
 						      className="svg-container-banner"
 						      style={{
